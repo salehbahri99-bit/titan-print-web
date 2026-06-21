@@ -5029,16 +5029,35 @@ function deleteUser(id){
 
 /* ── guard show() ── */
 /* ── guard show() ── */
-function show(v){
- try{
-  if(currentUser&&Array.isArray(currentUser.tabs)&&!currentUser.tabs.includes(v)&&v!=='notif'){
-   const first=currentUser.tabs[0]||'dash';
-   _baseShow(first);return;}
-  _baseShow(v);
- }catch(e){
-  console.error('show('+v+') error:',e);
-  toast&&toast('خطأ في فتح '+(TAB_LABELS[v]||v));
- }}
+function show(v) {
+    try {
+        // 1. إخفاء جميع الشاشات المرئية
+        document.querySelectorAll('.view').forEach(function(el) {
+            el.classList.remove('on');
+            el.style.display = 'none';
+        });
+
+        // 2. إزالة لون التفعيل من جميع التبويبات العلوية
+        document.querySelectorAll('.tabs button').forEach(function(btn) {
+            btn.classList.remove('on');
+        });
+
+        // 3. إظهار الشاشة المطلوبة فقط بناءً على أمر الزر
+        const targetView = document.getElementById('view-' + v);
+        if(targetView) {
+            targetView.classList.add('on');
+            targetView.style.display = 'block'; 
+        }
+
+        // 4. تظليل التبويب الذي نقرت عليه ليظهر كـ "نشط"
+        const targetTab = document.getElementById('tab-' + v);
+        if(targetTab) {
+            targetTab.classList.add('on');
+        }
+    } catch(e) {
+        console.log("تم تجاوز خطأ الواجهة:", e);
+    }
+}
 
 
 
